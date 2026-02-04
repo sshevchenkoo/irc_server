@@ -4,12 +4,6 @@
 #include <vector>
 #include <map>
 #include <iostream>
-#include <queue>
-#include <set>
-#include <cctype>
-#include <cstdio>
-#include <sstream>
-#include "../utils/utils.hpp"
-#include "Channel.hpp"
-#include "../server/Server.hpp"
-//#include "../client/Client.hpp"
+#include "../Client/Client.hpp"
+
+#define MAX_MESS_LEN 510
