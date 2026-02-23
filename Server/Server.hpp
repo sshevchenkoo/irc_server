@@ -18,11 +18,14 @@
 #include <sys/poll.h>
 #include <cstddef>
 #include <iostream>
-#include "../utils/utils.hpp"
-//#include "../channel/Channel.hpp"
-//#include "../client/Client.hpp"
+#include "../irc/Channel.hpp"
 
 class Client;
+
+
+#ifndef SERVERNAME
+# define SERVERNAME "SuperServ"
+#endif
 
 #define CONNECTION_QUEUE_SIZE 100
 #define POLL_TIMEOUT 200

@@ -5,6 +5,7 @@
 #include <exception>
 #include <sstream>
 #include <stdexcept>
+#include <signal.h>
 
 #define LOG_INFO std::cerr << "[INFO] "
 #define LOG_DEBUG std::cerr << "[DEBUG] "

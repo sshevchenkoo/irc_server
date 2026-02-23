@@ -1,11 +1,17 @@
 #pragma once
 
+#include <queue>
+#include <string>
+#include <set>
+
+
 #include "Irc.hpp"
-#include "../server/Server.hpp"
-#include "../utils/utils.hpp"
-//#include "../client/Client.hpp"
+#include "../Server/Server.hpp"
+#include "../Utils/utils.hpp"
+#include "../Client/Client.hpp"
 
 class Client;
+
 
 enum ChannelModes
 {
