@@ -12,6 +12,7 @@
 #define LOG_ERR std::cerr << "[ERROR] "
 
 extern volatile sig_atomic_t g_running;
-
 unsigned short parsePort(const std::string& str);
 void signal_handler(int sig);
+
+std::vector<std::string> split(const std::string& str, char delimiter);

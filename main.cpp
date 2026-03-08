@@ -3,7 +3,7 @@
 
 volatile sig_atomic_t g_running = 1;
 
-int main(int argc , char **argv)
+int main(int argc, char **argv)
 {
 
     if (argc != 3)
@@ -11,7 +11,7 @@ int main(int argc , char **argv)
         std::cerr << "Usage: " << argv[0] << " <port> <password>\n";
         return 1;
     }
-    try 
+    try
     {
         unsigned short port = parsePort(argv[1]);
         Server server(port, argv[2]);
@@ -21,7 +21,7 @@ int main(int argc , char **argv)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Error: " << e.what() <<std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
     return 0;
