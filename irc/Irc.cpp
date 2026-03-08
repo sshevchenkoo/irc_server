@@ -33,8 +33,6 @@ void IRC::initNumAnswers()
 	numAnswers[ERR_USERONCHANNEL] = "is already in channel";
 	numAnswers[ERR_NOTREGISTERED] = "You have not registered";
 
-	/* all errors will be here*/
-
 	numAnswers[ERR_NEEDMOREPARAMS] = "Not enough parameters";
 	numAnswers[ERR_ALREADYREGISTRED] = "You may not reregister";
 	numAnswers[ERR_PASSWDMISMATCH] = "Password incorrect";
@@ -63,3 +61,33 @@ void IRC::initHandlers()
 	handlers["TOPIC"] = &handleTOPIC;
 	handlers["QUIT"] = &handleQUIT;
 }
+
+bool IRC:: extractOneMessage(std::string& buff, std::string& msg)
+{
+	std::size_t pos = buff.find("\n");
+	if(pos == std::string::npos)
+		return false;
+	size_t end = pos;
+	if(end > 0 && buff[end - 1] == '\r')
+		end--;
+	if(end > MAX_MESS_LEN)
+		end = MAX_MESS_LEN;
+	msg.assign(buff, 0, end);
+	buff.erase(0, pos + 1);
+	return true;
+
+}
+
+static inline void stdToUpper(std::string &s)
+{
+	for(std::size_t i = 0; i < s.size(); i++)
+		s[i] = toupper(s[i]);
+}
+
+std::string IRC::makeStringFromServ(const std::string& message)
+{
+	return(std::string(":") + SERVERNAME + " " + message + "\r\n");
+}
+
+
+
