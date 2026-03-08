@@ -1,18 +1,20 @@
 #include "utils.hpp"
 
-std::vector<std::string> split(const std::string& str, char delimiter) {
+std::vector<std::string> split(const std::string &str, char delimiter)
+{
     std::vector<std::string> tokens;
     std::stringstream ss(str);
     std::string token;
 
-    while (std::getline(ss, token, delimiter)) {
+    while (std::getline(ss, token, delimiter))
+    {
         tokens.push_back(token);
     }
 
     return tokens;
 }
 
-unsigned short parsePort(const std::string& str)
+unsigned short parsePort(const std::string &str)
 {
     if (str.empty())
         throw std::invalid_argument("empty port");
