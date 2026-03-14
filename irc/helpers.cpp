@@ -87,12 +87,20 @@ void IRC::handleUSER(Server &S, Client &client, IRC::command &cmd)
 {
 	if (checkNoCommand(S, client, cmd, ERR_NEEDMOREPARAMS))
 		return;
-	if (cmd.params.size() < 3 || cmd.trailing.empty())
+	if (cmd.params.size() < 3)
 	{
-		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "USER"));
+		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ" "USER"));
 		return;
 	}
-	client.setUser(cmd.params[0], cmd.trailing);
+	std::string realname = cmd.trailing;
+	if(realname.empty() && cmd.params.size() >= 4)
+		realname = cmd.params[3];
+	if(realname.empty())
+	{
+		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ" "USER"));
+		return;
+	}
+	client.setUser(cmd.params[0], realname);
 	S.tryRegister(client);
 }
 
@@ -170,6 +178,18 @@ void IRC::handlePRIVMSG(Server &S, Client &client, IRC::command &cmd)
 		}
 		S.sendToClient(*reciept,
 					   ":" + client.getMask() + " PRIVMSG " + reciept->getNick() + " :" + cmd.trailing + "\r\n");
+	}
+}
+
+void IRC :: handleCAP(Server &Server, Client &Client, IRC::command &cmd)
+{
+	if(cmd.params.empty())
+		return;
+	std::string subcmd = cmd.params[0];
+	if(subcmd == "LS")
+	{
+		Server.sendToClient(Client, ":" + std::string("SuperServ") + " CAP " + Client.getNick()
+	+ " LS:\r\n" );
 	}
 }
 

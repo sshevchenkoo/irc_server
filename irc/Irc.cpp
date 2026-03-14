@@ -61,6 +61,7 @@ void IRC::initHandlers()
 	handlers["KICK"] = &handleKICK;
 	handlers["TOPIC"] = &handleTOPIC;
 	handlers["QUIT"] = &handleQUIT;
+	handlers["CAP"] = &handleCAP;
 }
 
 bool IRC::extractOneMessage(std::string &buff, std::string &msg)
@@ -83,6 +84,7 @@ static inline void strToUpper(std::string &s)
 	for (std::size_t i = 0; i < s.size(); i++)
 		s[i] = toupper(s[i]);
 }
+
 
 std::string IRC::makeStringFromServ(const std::string &message)
 {
@@ -132,8 +134,14 @@ void IRC::handleMessage(Server &s, Client &client, const std::string &msg)
 		return;
 	}
 
-	tempCmd.display();
-	if (tempCmd.cmd == "PRIVMSG" || tempCmd.cmd == "JOIN" || tempCmd.cmd == "MODE" || tempCmd.cmd == "PART" || tempCmd.cmd == "INVITE" || tempCmd.cmd == "KICK" || tempCmd.cmd == "TOPIC")
+	std::map<std::string, handler>::iterator it = handlers.find(tempCmd.cmd);
+	if (it == handlers.end())
+	{
+		s.sendToClient(client, IRC::makeNumString(ERR_UNKNOWNCOMMAND, client, SERVERNAME, tempCmd.cmd));
+		return;
+	}
+
+	if (tempCmd.cmd != "PASS" && tempCmd.cmd != "NICK" && tempCmd.cmd != "USER" && tempCmd.cmd != "PING" && tempCmd.cmd != "PONG" && tempCmd.cmd != "QUIT" && tempCmd.cmd != "CAP")
 	{
 		if (!client.isRegistred())
 		{
@@ -141,6 +149,8 @@ void IRC::handleMessage(Server &s, Client &client, const std::string &msg)
 			return;
 		}
 	}
+
+	it->second(s, client, tempCmd);
 }
 
 static void trimRight(std::string &s)

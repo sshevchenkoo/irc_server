@@ -93,6 +93,7 @@ public:
 	static void handleKICK(Server &, Client &, command &);
 	static void handleTOPIC(Server &, Client &, command &);
 	static void handleQUIT(Server &, Client &, command &);
+	static void  handleCAP(Server &Server, Client &Client, IRC::command &cmd);
 
 	typedef void (*handler)(Server &, Client &, command &);
 
