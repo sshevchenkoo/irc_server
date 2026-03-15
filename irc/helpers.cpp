@@ -416,12 +416,6 @@ void IRC::handleINVITE(Server &S, Client &client, command &cmd)
 		return;
 	}
 
-	if (cmd.params[1][0] != '#' && cmd.params[1][0] != '&')
-	{
-		S.sendToClient(client, IRC::makeNumStringName(ERR_NOSUCHCHANNEL, cmd.params[1]));
-		return;
-	}
-
 	std::string targetChannelName = cmd.params[1].substr(1);
 
 	Client *targetClient = S.getClientByNick(cmd.params[0]);

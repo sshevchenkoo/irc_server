@@ -137,9 +137,12 @@ void IRC::handleMessage(Server &s, Client &client, const std::string &msg)
 	std::map<std::string, handler>::iterator it = handlers.find(tempCmd.cmd);
 	if (it == handlers.end())
 	{
+		if (tempCmd.cmd == "WHO")
+			return ;
 		s.sendToClient(client, IRC::makeNumString(ERR_UNKNOWNCOMMAND, client, SERVERNAME, tempCmd.cmd));
 		return;
 	}
+
 
 	if (tempCmd.cmd != "PASS" && tempCmd.cmd != "NICK" && tempCmd.cmd != "USER" && tempCmd.cmd != "PING" && tempCmd.cmd != "PONG" && tempCmd.cmd != "QUIT" && tempCmd.cmd != "CAP")
 	{
