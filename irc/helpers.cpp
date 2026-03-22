@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   helpers.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rkobelie <rkobelie@student.42warsaw.pl>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/03/21 15:49:26 by rkobelie          #+#    #+#             */
+/*   Updated: 2026/03/21 23:07:42 by rkobelie         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Irc.hpp"
 #include "../Utils/utils.hpp"
 #include "../Server/Server.hpp"
@@ -89,15 +101,17 @@ void IRC::handleUSER(Server &S, Client &client, IRC::command &cmd)
 		return;
 	if (cmd.params.size() < 3)
 	{
-		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ" "USER"));
+		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ"
+																			  "USER"));
 		return;
 	}
 	std::string realname = cmd.trailing;
-	if(realname.empty() && cmd.params.size() >= 4)
+	if (realname.empty() && cmd.params.size() >= 4)
 		realname = cmd.params[3];
-	if(realname.empty())
+	if (realname.empty())
 	{
-		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ" "USER"));
+		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client, "SuperServ"
+																			  "USER"));
 		return;
 	}
 	client.setUser(cmd.params[0], realname);
@@ -181,15 +195,14 @@ void IRC::handlePRIVMSG(Server &S, Client &client, IRC::command &cmd)
 	}
 }
 
-void IRC :: handleCAP(Server &Server, Client &Client, IRC::command &cmd)
+void IRC ::handleCAP(Server &Server, Client &Client, IRC::command &cmd)
 {
-	if(cmd.params.empty())
+	if (cmd.params.empty())
 		return;
 	std::string subcmd = cmd.params[0];
-	if(subcmd == "LS")
+	if (subcmd == "LS")
 	{
-		Server.sendToClient(Client, ":" + std::string("SuperServ") + " CAP " + Client.getNick()
-	+ " LS:\r\n" );
+		Server.sendToClient(Client, ":" + std::string("SuperServ") + " CAP " + Client.getNick() + " LS:\r\n");
 	}
 }
 
@@ -219,6 +232,8 @@ void IRC::handleJOIN(Server &S, Client &client, IRC::command &cmd)
 	Channel *c = S.getChannelByName(channel_name);
 	std::string key = (cmd.params.size() > 1) ? cmd.params[1] : "";
 
+	std::cout << "JOIN channel = " << channel_name << std::endl;
+
 	if (!c)
 	{
 		LOG_DEBUG << "Creating channel " << channel_name << std::endl;
@@ -233,22 +248,23 @@ void IRC::handleJOIN(Server &S, Client &client, IRC::command &cmd)
 	else
 	{
 		if (c->hasMode(MODE_INVITE_ONLY) && !c->isInvited(&client))
-		{
-			S.sendToClient(client, IRC::makeNumStringName(ERR_INVITEONLYCHAN, client.getNick() + " " + c->getDisplayName()));
-			return;
-		}
-		if (c->isFull() && !c->isInvited(&client))
-		{
-			S.sendToClient(client, IRC::makeNumStringChannel(ERR_CHANNELISFULL, *c));
-			return;
-		}
-		if (c->hasMode(MODE_KEY_PROTECTED) && !c->isKey(key) && !c->isInvited(&client))
-		{
-			S.sendToClient(client, IRC::makeNumStringChannel(ERR_BADCHANNELKEY, *c));
-			return;
-		}
+	{
+		S.sendToClient(client, IRC::makeNumStringName(ERR_INVITEONLYCHAN, client.getNick() + " " + c->getDisplayName()));
+		return;
+	}
+	if (c->isFull() && !c->isInvited(&client))
+	{
+		S.sendToClient(client, IRC::makeNumStringChannel(ERR_CHANNELISFULL, *c));
+		return;
+	}
+	if (c->hasMode(MODE_KEY_PROTECTED) && !c->isKey(key) && !c->isInvited(&client))
+	{
+		S.sendToClient(client, IRC::makeNumStringChannel(ERR_BADCHANNELKEY, *c));
+		return;
+	}
 	}
 	c->addClient(&client);
+	c->removeInvited(&client);
 
 	std::string joinMsg = ":" + client.getMask() + " JOIN :" + c->getDisplayName() + "\r\n";
 	for (std::set<const Client *>::iterator it = c->getClients().begin();
@@ -412,37 +428,85 @@ void IRC::handleINVITE(Server &S, Client &client, command &cmd)
 
 	if (cmd.params.size() < 2)
 	{
-		S.sendToClient(client, IRC::makeNumString(ERR_NEEDMOREPARAMS, client));
+		S.sendToClient(client,
+					   IRC::makeNumString(ERR_NEEDMOREPARAMS, client));
 		return;
 	}
 
-	std::string targetChannelName = cmd.params[1].substr(1);
+	std::string targetNick = cmd.params[0];
+	std::string channelParam = cmd.params[1];
+	if (channelParam.empty() || (channelParam[0] != '#' && channelParam[0] != '&'))
+	{
+		S.sendToClient(client,
+					   IRC::makeNumStringName(ERR_NOSUCHCHANNEL, channelParam));
+		return;
+	}
 
-	Client *targetClient = S.getClientByNick(cmd.params[0]);
-	Channel *targetChannel = S.getChannelByName(targetChannelName);
+	std::string channelName = channelParam.substr(1);
+	Client *targetClient = S.getClientByNick(targetNick);
+	Channel *targetChannel = S.getChannelByName(channelName);
+
 	if (!targetChannel)
 	{
-		S.sendToClient(client, IRC::makeNumStringName(ERR_NOSUCHCHANNEL, targetChannelName));
+		S.sendToClient(client,
+					   IRC::makeNumStringName(ERR_NOSUCHCHANNEL, channelParam));
+		return;
 	}
-	else if (!targetChannel->isOperator(&client))
+
+	if (!targetChannel->hasClient(&client))
 	{
-		S.sendToClient(client, IRC::makeNumStringChannel(ERR_CHANOPRIVNEEDED, *targetChannel));
+		S.sendToClient(client,
+					   IRC::makeNumStringChannel(ERR_NOTONCHANNEL, *targetChannel));
+		return;
 	}
-	else if (!targetClient)
+
+	if (!targetChannel->isOperator(&client))
 	{
-		S.sendToClient(client, IRC::makeNumStringName(ERR_NOSUCHNICK, client.getNick(), cmd.params[0]));
+		S.sendToClient(client,
+					   IRC::makeNumStringChannel(ERR_CHANOPRIVNEEDED, *targetChannel));
+		return;
 	}
-	else if (targetChannel->hasClient(targetClient))
+
+	if (!targetClient)
 	{
-		S.sendToClient(client, IRC::makeNumStringName(ERR_USERONCHANNEL, client.getNick() + " " + targetClient->getNick() + " " + targetChannel->getDisplayName()));
+		S.sendToClient(client,
+					   IRC::makeNumStringName(ERR_NOSUCHNICK, targetNick));
+		return;
 	}
-	else
+
+	if (targetChannel->hasClient(targetClient))
 	{
-		S.sendToClient(*targetClient, ":" + client.getMask() + " INVITE " + targetClient->getNick() +
-										  " :" + targetChannel->getDisplayName() + "\r\n");
-		S.sendToClient(client, IRC::makeNumStringName(RPL_INVITING, targetChannel->getDisplayName() + " " + targetClient->getNick()));
-		targetChannel->addInvited(targetClient);
+		S.sendToClient(client,
+					   IRC::makeNumStringName(
+						   ERR_USERONCHANNEL,
+						   targetClient->getNick() + " " +
+							   targetChannel->getDisplayName()));
+		return;
 	}
+
+	if (targetChannel->isInvited(targetClient))
+	{
+		S.sendToClient(client,
+				   IRC::makeNumStringName(
+					   RPL_INVITING,
+					   targetClient->getNick(),
+					   SERVERNAME,
+					   targetChannel->getDisplayName()));
+		return;
+	}
+
+	targetChannel->addInvited(targetClient);
+
+	std::string inviteMsg = ":" + client.getMask() + " INVITE " +
+				   targetClient->getNick() + " " + targetChannel->getDisplayName() + "\r\n";
+	S.sendToClient(*targetClient, inviteMsg);
+
+	S.sendToClient(client,
+				   IRC::makeNumStringName(
+					   RPL_INVITING,
+					   targetClient->getNick(),
+					   SERVERNAME,
+					   targetChannel->getDisplayName()));
 }
 
 void IRC::handleKICK(Server &S, Client &client, command &cmd)

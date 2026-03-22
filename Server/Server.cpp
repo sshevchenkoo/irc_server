@@ -143,7 +143,7 @@ void Server::acceptNewClients(std::vector<pollfd> &toAdd)
             break;
         }
 
-        int cfl = fcntl(client_fd, F_GETFL, 0);
+        int cfl = fcntl(client_fd, F_GETFL, O_NONBLOCK);
         if (cfl == -1 || fcntl(client_fd, F_SETFL, cfl | O_NONBLOCK) == -1)
         {
             close(client_fd);
