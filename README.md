@@ -9,11 +9,11 @@ The goal of the project is to build a fully functional IRC server that handles m
 A C++98 IRC server using `poll()`-based I/O multiplexing. Compatible with the [Halloy](https://halloy.chat) IRC client.
 ## Project Structure
 
-
+```
 irc_server/
 ├── main.cpp                  # Entry point: argument parsing, server startup
 ├── Makefile                  # Build configuration
-|│
+│
 ├── Server/
 │   ├── Server.hpp / .cpp     # Event loop (poll), client and channel management
 │
@@ -30,7 +30,7 @@ irc_server/
 │
 ├── obj/                      # Compiled object files (auto-generated)
 └── deps/                     # Dependency files for incremental builds
-
+```
 
 ## Architecture
 
