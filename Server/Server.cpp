@@ -40,10 +40,7 @@ void Server::init()
 
     LOG_DEBUG << "Listening on 0.0.0.0:" << _port << std::endl;
 
-    int fl = fcntl(_listen_fd, F_GETFL, 0);
-    if (fl == -1)
-        throw std::runtime_error("fcntl F_GETFL listen");
-    if (fcntl(_listen_fd, F_SETFL, fl | O_NONBLOCK) == -1)
+    if (fcntl(_listen_fd, F_SETFL, O_NONBLOCK) == -1)
         throw std::runtime_error("fcntl F_SETFL O_NONBLOCK listen");
 
     _pfds.push_back(Server::makePfd(_listen_fd));
@@ -143,8 +140,7 @@ void Server::acceptNewClients(std::vector<pollfd> &toAdd)
             break;
         }
 
-        int cfl = fcntl(client_fd, F_SETFL, O_NONBLOCK);
-        if (cfl == -1 || fcntl(client_fd, F_SETFL, cfl | O_NONBLOCK) == -1)
+        if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1)
         {
             close(client_fd);
             continue;
@@ -222,7 +218,7 @@ bool Server::handleWrite(int fd)
         else
             setEvents(fd, POLLOUT | POLLIN);
     }
-    setEvents(fd, POLLIN);
+    //setEvents(fd, POLLIN);
     return true;
 }
 

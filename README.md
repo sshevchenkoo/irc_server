@@ -1,9 +1,12 @@
-IRC Server
+This project has been created as part
+of the 42 curriculum by yashevch, rkobelie.
 
+# IRC Server
+
+# Description
+This project is a C++98 implementation of an IRC (Internet Relay Chat) server developed as part of the 42 curriculum.
+The goal of the project is to build a fully functional IRC server that handles multiple clients using a single-threaded, event-driven architecture based on poll() and non-blocking sockets (O_NONBLOCK). The server supports core IRC features such as client registration, messaging, channel management, and operator privileges.
 A C++98 IRC server using `poll()`-based I/O multiplexing. Compatible with the [Halloy](https://halloy.chat) IRC client.
-
-
-
 ## Project Structure
 
 
@@ -56,7 +59,7 @@ accept()
 
 Every `poll()` cycle calls `tick()`. If a client is inactive for 240 s the server sends `PING :tick`. If no `PONG` is received within 250 s the client is disconnected.
 
-
+# Instructions
 
 ## Build
 
@@ -227,3 +230,13 @@ Poll timeout 200 ms
 Read buffer 1024 bytes
 Max message length 510 chars
 Server name `SuperServ` (override via `-DSERVERNAME`)
+
+# Resources
+## Documentation & References
+
+- RFC 1459 — Internet Relay Chat Protocol
+- RFC 2812 — IRC Client Protocol
+- poll() and socket programming (POSIX documentation)
+- Beej’s Guide to Network Programming
+- man pages
+- Non-blocking I/O и event loops
